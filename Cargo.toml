@@ -1,0 +1,15 @@
+[package]
+name = "usermode-helper"
+version = "0.1.0"
+authors = ["Tycho Andersen <tycho@tycho.ws>"]
+license = "Apache-2.0"
+readme = "README.md"
+homepage = "https://github.com/tych0/huldufolk"
+repository = "https://github.com/tych0/huldufolk"
+edition = "2018"
+
+[dependencies]
+serde = "1"
+serde_derive = "1"
+toml = "0.4"
+libc = "0.2"
