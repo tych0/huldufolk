@@ -1,0 +1,114 @@
+# Here is a complete list of everything that calls call_usermodehelper() in
+# Linux 5.0, with the exception of drivers in staging.
+#
+# There are also some entries called "argc", which could be used to limit the
+# number of arguments passed to a usermode helper or some regexes ("argN",
+# syntax subject to change :) that could be used to match the content of the
+# arguments. Future work could be adding capability sets, etc.
+#
+# Finally, this is intended to mostly serve as a list that distros could use to
+# drop in. Special core handlers (e.g. apport on ubuntu) will probably need to
+# be patched in, but hopefully otherwise it should be mostly ok.
+
+# arch/x86/kernel/cpu/mce/dev-mcelog.c
+# No default, set via sysfs.
+[[helpers]]
+path = ""
+
+# drivers/block/drbd/drbd_nl.c
+# Can change based on a module parameter.
+[[helpers]]
+path = "/sbin/drbdadm"
+argc = 3
+arg2 = "minor-\d*"
+
+# drivers/macintosh/windfarm_core.c
+# Hard coded.
+[[helpers]]
+path = "/sbin/critical_overtemp"
+argc = 1
+
+# drivers/net/hamradio/baycom_epp.c
+# Hard coded.
+[[helpers]]
+path = "/usr/sbin/eppfpga"
+argc = 6
+
+# drivers/pnp/pnpbios/core.c
+# Hard coded.
+[[helpers]]
+path = "/sbin/pnpbios"
+argc = 2
+
+# drivers/video/fbdev/uvesafb.c
+# Set by module param.
+[[helpers]]
+path = "/sbin/v86d"
+argc = 1
+
+# fs/coredump.c
+# set via sysctl.
+[[helpers]]
+path = "core"
+
+# fs/nfs/cache_lib.c
+# Can change based on module parameter.
+[[helpers]]
+path = "/sbin/nfs_cache_getent"
+
+# init/do_mounts_initrd.c
+# It may be okay to drop this from the actual rootfs since it should only be
+# executed from the initrd, and indeed many initrds may not export this.
+[[helpers]]
+path = "/linuxrc"
+argc = 1
+
+# kernel/cgroup/cgroup-v1.c
+# Nothing by default, van be set by echoing a path into a file older systemds
+# used to use this, IIRC, but it seems newer (v239) ones don't.
+[[helpers]]
+path = ""
+
+# kernel/kmod.c
+# set via sysctl.
+[[helpers]]
+path = "/sbin/modprobe"
+argc = 4
+arg1 = "-q"
+arg2 = "--"
+
+# kernel/reboot.c
+# poweroff_cmd can be set via a sysctl
+[[helpers]]
+path = "/sbin/poweroff"
+
+# kernel/reboot.c
+# Hard coded.
+[[helpers]]
+path = "/sbin/reboot"
+argc = 1
+
+# lib/kobject_uevent.c
+# Default set by CONFIG_UEVENT_HELPER_PATH, controllable by sysctl.
+[[helpers]]
+path = "/sbin/hotplug"
+argc = 2
+
+# net/bridge/br_stp_if.c
+# Hard coded.
+[[helpers]]
+path = "/sbin/bridge-stp"
+argc = 3
+
+# security/keys/request_key.c
+# Hard coded.
+[[helpers]]
+path = "/sbin/request-key"
+argc = 8
+
+# security/tomoyo/load_policy.c
+# Defaults to CONFIG_SECURITY_TOMOYO_POLICY_LOADER and can be set by
+# TOMOYO_loader kernel CLI param.
+[[helpers]]
+path = "/sbin/tomoyo-init"
+argc = 1
