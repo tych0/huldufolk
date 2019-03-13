@@ -11,6 +11,10 @@ check:
 	DEFAULT_CONFIG_PATH=./usermode-helper.conf cargo build
 	bats -t $(patsubst %,test/%.bats,$(TEST))
 
+.PHONY: check-dmesg
+check-dmesg:
+	sudo bats -t test/dmesg.bats
+
 .PHONY: clean
 clean:
 	cargo clean

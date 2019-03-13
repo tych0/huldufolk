@@ -90,7 +90,6 @@ fuss.
 
 ## TODO
 
-* log to syslog
 * argument filters (probably based on regexes?)
 * dropping capabilities
 * setting NNP?

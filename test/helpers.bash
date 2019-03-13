@@ -12,7 +12,7 @@ function usermode-helper {
         args=""
     fi
     pushd "${TEMP_DIR}"
-    run bash -c "exec -a $1 \"${ROOT_DIR}/target/debug/usermode-helper\" $args"
+    run bash -c "HULDUFOLK_DEBUG=1 exec -a $1 \"${ROOT_DIR}/target/debug/usermode-helper\" $args"
     popd
     echo "$output"
     [ "$status" -eq 0 ]
