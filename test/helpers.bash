@@ -5,7 +5,7 @@ function make_tempdir()
     declare -g TEMP_DIR=$(mktemp -d huldufolk-test.XXXXXXXX)
 }
 
-function usermode-helper {
+function real-usermode-helper {
     if [ "$#" -gt 1 ]; then
         args="${@:2}"
     else
@@ -15,7 +15,16 @@ function usermode-helper {
     run bash -c "HULDUFOLK_DEBUG=1 exec -a $1 \"${ROOT_DIR}/target/debug/usermode-helper\" $args"
     popd
     echo "$output"
+}
+
+function usermode-helper {
+    real-usermode-helper "$@"
     [ "$status" -eq 0 ]
+}
+
+function usermode-helper-deny {
+    real-usermode-helper "$@"
+    [ "$status" -eq 1 ]
 }
 
 function cleanup {

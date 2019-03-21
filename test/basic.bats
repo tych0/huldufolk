@@ -16,3 +16,7 @@ function teardown() {
 @test "basic /bin/true helper" {
     usermode-helper /bin/true
 }
+
+@test "basic /bin/ls denial" {
+    usermode-helper-deny /bin/ls
+}
