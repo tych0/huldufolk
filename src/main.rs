@@ -5,11 +5,12 @@ extern crate toml;
 extern crate serde_derive;
 extern crate libc;
 
-use std::ffi::CString;
+use std::ffi::{CString, OsString};
 use std::fs;
 use std::io::Write;
 use std::process::exit;
 use std::os::unix::io::AsRawFd;
+use std::convert::From;
 
 #[derive(Debug, Deserialize)]
 struct Config {
@@ -19,6 +20,21 @@ struct Config {
 #[derive(Debug, Deserialize)]
 struct Helper {
     path: String,
+    argc: Option<usize>,
+}
+
+impl Helper {
+    fn allowed(&self, args: &Vec<OsString>) -> bool {
+        if !args.get(0).map_or(false, |a| a == &OsString::from(&self.path)) {
+            return false
+        }
+
+        if self.argc.map_or(false, |argc| args.len() != argc) {
+            return false
+        }
+
+        return true
+    }
 }
 
 const DEFAULT_CONFIG_PATH: Option<&'static str> = option_env!("DEFAULT_CONFIG_PATH");
@@ -67,7 +83,8 @@ fn main() {
     let name = std::env::args().nth(0).expect("program doesn't have a 0 arg?");
 
     // Should we support regexes here? Probably not.
-    let thing = config.helpers.iter().find(|s| s.path == name).unwrap_or_else(|| {
+    let args = std::env::args_os().collect();
+    let thing = config.helpers.iter().find(|s| s.allowed(&args)).unwrap_or_else(|| {
         fail!("invalid usermode helper {}", name);
     });
 
