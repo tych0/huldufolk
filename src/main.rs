@@ -5,12 +5,12 @@ extern crate toml;
 extern crate serde_derive;
 extern crate libc;
 
+use std::convert::From;
 use std::ffi::{CString, OsString};
 use std::fs;
 use std::io::Write;
-use std::process::exit;
 use std::os::unix::io::AsRawFd;
-use std::convert::From;
+use std::process::exit;
 
 #[derive(Debug, Deserialize)]
 struct Config {
@@ -25,15 +25,18 @@ struct Helper {
 
 impl Helper {
     fn allowed(&self, args: &Vec<OsString>) -> bool {
-        if !args.get(0).map_or(false, |a| a == &OsString::from(&self.path)) {
-            return false
+        if !args
+            .get(0)
+            .map_or(false, |a| a == &OsString::from(&self.path))
+        {
+            return false;
         }
 
         if self.argc.map_or(false, |argc| args.len() != argc) {
-            return false
+            return false;
         }
 
-        return true
+        return true;
     }
 }
 
@@ -56,14 +59,18 @@ fn log_to_kmsg() {
         Ok(f) => f,
         Err(e) => {
             eprintln!("couldn't open /dev/kmsg: {}", e);
-            return
+            return;
         }
     };
 
     unsafe {
         let ret = libc::dup2(file.as_raw_fd(), libc::STDERR_FILENO);
         if ret < 0 {
-            libc::perror(CString::new("couldn't dup2 over stderr").expect("constant string").as_ptr());
+            libc::perror(
+                CString::new("couldn't dup2 over stderr")
+                    .expect("constant string")
+                    .as_ptr(),
+            );
         }
     }
 }
@@ -72,39 +79,56 @@ fn main() {
     let _ = std::env::var("HULDUFOLK_DEBUG").map_err(|_| log_to_kmsg());
 
     let path = DEFAULT_CONFIG_PATH.unwrap_or("/etc/usermode-helper.conf");
-    let raw = fs::read_to_string(path).unwrap_or_else(|e| {
-        fail!("couldn't read config file {}: {}", path, e)
-    });
+    let raw = fs::read_to_string(path)
+        .unwrap_or_else(|e| fail!("couldn't read config file {}: {}", path, e));
 
     let config: Config = toml::from_str(&raw).unwrap_or_else(|e| {
         fail!("couldn't parse config file {}: {}", path, e);
     });
 
-    let name = std::env::args().nth(0).expect("program doesn't have a 0 arg?");
+    let name = std::env::args()
+        .nth(0)
+        .expect("program doesn't have a 0 arg?");
 
     // Should we support regexes here? Probably not.
     let args = std::env::args_os().collect();
-    let thing = config.helpers.iter().find(|s| s.allowed(&args)).unwrap_or_else(|| {
-        fail!("invalid usermode helper {}", name);
-    });
+    let thing = config
+        .helpers
+        .iter()
+        .find(|s| s.allowed(&args))
+        .unwrap_or_else(|| {
+            fail!("invalid usermode helper {}", name);
+        });
 
     let c_exe = CString::new(thing.path.clone()).unwrap_or_else(|e| {
         fail!("couldn't create exec executable name: {}", e);
     });
 
-    let c_args: Vec<_> = std::env::args().skip(1).map(|a| {
-        CString::new(a).unwrap_or_else(|e| {
-            fail!("couldn't create exec args array: {}", e);
+    let c_args: Vec<_> = std::env::args()
+        .skip(1)
+        .map(|a| {
+            CString::new(a).unwrap_or_else(|e| {
+                fail!("couldn't create exec args array: {}", e);
+            })
         })
-    }).collect();
+        .collect();
 
-    let ptr_args: Vec<_> = std::iter::once(c_exe.as_ptr()).chain(c_args.iter().map(|a| {
-        a.as_ptr()
-    }).chain(std::iter::once(std::ptr::null()))).collect();
+    let ptr_args: Vec<_> = std::iter::once(c_exe.as_ptr())
+        .chain(
+            c_args
+                .iter()
+                .map(|a| a.as_ptr())
+                .chain(std::iter::once(std::ptr::null())),
+        )
+        .collect();
 
     unsafe {
         libc::execvp(c_exe.as_ptr(), ptr_args.as_ptr());
-        libc::perror(CString::new("couldn't execvp").expect("constant string").as_ptr());
+        libc::perror(
+            CString::new("couldn't execvp")
+                .expect("constant string")
+                .as_ptr(),
+        );
     }
     exit(1);
 }

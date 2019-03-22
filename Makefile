@@ -2,6 +2,7 @@ TEST?=$(patsubst test/%.bats,%,$(wildcard test/*.bats))
 
 .PHONY: all
 all:
+	rustfmt src/*
 	cargo build
 
 .PHONY: check
