@@ -20,7 +20,6 @@ path = ""
 [[helpers]]
 path = "/sbin/drbdadm"
 argc = 3
-arg2 = "minor-\d*"
 
 # drivers/macintosh/windfarm_core.c
 # Hard coded.
@@ -74,8 +73,6 @@ path = ""
 [[helpers]]
 path = "/sbin/modprobe"
 argc = 4
-arg1 = "-q"
-arg2 = "--"
 
 # kernel/reboot.c
 # poweroff_cmd can be set via a sysctl
