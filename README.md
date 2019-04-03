@@ -91,7 +91,6 @@ fuss.
 ## TODO
 
 * argument filters (probably based on regexes?)
-* dropping capabilities
 * setting NNP?
 * Namespaces?
 * seccomp filters? Is there some nice language for specifying these in config

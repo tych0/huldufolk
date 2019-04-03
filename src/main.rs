@@ -3,6 +3,7 @@
 extern crate toml;
 #[macro_use]
 extern crate serde_derive;
+extern crate capabilities;
 extern crate libc;
 
 use std::convert::From;
@@ -12,15 +13,24 @@ use std::io::Write;
 use std::os::unix::io::AsRawFd;
 use std::process::exit;
 
-#[derive(Debug, Deserialize)]
+// The "prctl" library depends on nix, which itself depends on some other stuff. We only need these
+// few defines, so let's just hard code them here. Plus, it doesn't have the ambient ones.
+const PR_SET_SECUREBITS: libc::c_int = 28;
+const SECBIT_NOROOT: libc::c_int = 0x01;
+const PR_CAP_AMBIENT: libc::c_int = 47;
+const PR_CAP_AMBIENT_RAISE: libc::c_int = 2;
+
+#[derive(Deserialize)]
 struct Config {
     helpers: Vec<Helper>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 struct Helper {
     path: String,
     argc: Option<usize>,
+    #[serde(deserialize_with = "deserialize_caps", default)]
+    capabilities: Option<capabilities::Capabilities>,
 }
 
 impl Helper {
@@ -38,6 +48,20 @@ impl Helper {
 
         return true;
     }
+}
+
+fn deserialize_caps<'de, D>(deserializer: D) -> Result<Option<capabilities::Capabilities>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let s: &str = serde::Deserialize::deserialize(deserializer)?;
+    if s == "" {
+        return Ok(None);
+    }
+    return s
+        .parse::<capabilities::Capabilities>()
+        .map_err(|_| serde::de::Error::custom(format!("invalid caps {}", s)))
+        .map(|v| Some(v));
 }
 
 const DEFAULT_CONFIG_PATH: Option<&'static str> = option_env!("DEFAULT_CONFIG_PATH");
@@ -99,6 +123,40 @@ fn main() {
         .unwrap_or_else(|| {
             fail!("invalid usermode helper {}", name);
         });
+
+    if let Some(capabilities) = &thing.capabilities {
+        unsafe {
+            let ret = libc::prctl(PR_SET_SECUREBITS, SECBIT_NOROOT, 0, 0, 0);
+            if ret < 0 {
+                libc::perror(
+                    CString::new("couldn't set securebits")
+                        .expect("constant string")
+                        .as_ptr(),
+                );
+            }
+        }
+
+        if let Err(e) = capabilities.apply() {
+            fail!("couldn't apply caps: {}", e)
+        }
+
+        for cap in 0..capabilities::Capability::CAP_LAST_CAP as u32 {
+            if !capabilities.check(cap.into(), capabilities::Flag::Inheritable) {
+                continue;
+            }
+
+            unsafe {
+                let ret = libc::prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0);
+                if ret < 0 {
+                    libc::perror(
+                        CString::new(format!("couldn't set ambient cap {}", cap))
+                            .expect("constant string")
+                            .as_ptr(),
+                    );
+                }
+            }
+        }
+    }
 
     let c_exe = CString::new(thing.path.clone()).unwrap_or_else(|e| {
         fail!("couldn't create exec executable name: {}", e);
