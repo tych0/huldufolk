@@ -24,6 +24,17 @@ function usermode-helper {
 
 function usermode-helper-deny {
     real-usermode-helper "$@"
+    if ! echo "$output" | grep 'invalid usermode helper'; then
+        echo "failed, but didn't deny" && false
+    fi
+    [ "$status" -eq 1 ]
+}
+
+function usermode-helper-fail {
+    real-usermode-helper "$@"
+    if echo "$output" | grep 'invalid usermode helper'; then
+        echo "failed, but was denied" && false
+    fi
     [ "$status" -eq 1 ]
 }
 
