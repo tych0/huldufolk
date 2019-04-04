@@ -114,7 +114,6 @@ fn main() {
         .nth(0)
         .expect("program doesn't have a 0 arg?");
 
-    // Should we support regexes here? Probably not.
     let args = std::env::args_os().collect();
     let thing = config
         .helpers
