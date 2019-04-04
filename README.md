@@ -61,9 +61,14 @@ Linux 4.11 introduced a pair of compile time options,
 when set, force all usermode helper executions to go through the path specified
 (`/sbin/usermode-helper` by default), but passes the name of the original
 executable as `argv[0]`, so that userspace can figure out which thing was
-originally intended to be executed. While at Docker I wrote an initial
-implementation of this for
-(LinuxKit)[https://github.com/linuxkit/linuxkit/pull/2037], but it was not
+originally intended to be executed. This configuration setting is recommended
+by various Linux hardening guides (including Alexander Popov's excellent
+[kconfig-hardened-check](https://github.com/a13xp0p0v/kconfig-hardened-check)
+script), but vanishingly little information is available about the userspace
+counterpart to this kernel setting.
+
+While at Docker I wrote an initial implementation of this for
+[LinuxKit](https://github.com/linuxkit/linuxkit/pull/2037), but it was not
 really suitable for general purpose Linux distros. If we wanted to make it
 useful, we'd need a configuration file. But since it's written in C, then we'd
 have to parse stuff with that configuration file, and that would probably have
