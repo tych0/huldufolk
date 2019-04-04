@@ -73,6 +73,7 @@ path = ""
 [[helpers]]
 path = "/sbin/modprobe"
 argc = 4
+capabilities = "= cap_sys_module+eip"
 
 # kernel/reboot.c
 # poweroff_cmd can be set via a sysctl
