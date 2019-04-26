@@ -18,4 +18,5 @@ function teardown() {
 path = "/bin/true"
 EOF
     usermode-helper /bin/true
+    false
 }

@@ -27,6 +27,7 @@ struct Config {
 
 #[derive(Deserialize)]
 struct Helper {
+    #[serde(deserialize_with = "deserialize_path")]
     path: String,
     argc: Option<usize>,
     #[serde(deserialize_with = "deserialize_caps", default)]
@@ -39,6 +40,7 @@ impl Helper {
             .get(0)
             .map_or(false, |a| a == &OsString::from(&self.path))
         {
+            eprintln!("{} didn't match because of name", self.path);
             return false;
         }
 
@@ -48,6 +50,14 @@ impl Helper {
 
         return true;
     }
+}
+
+fn deserialize_path<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let s: String = serde::Deserialize::deserialize(deserializer)?;
+    return Ok(s.trim().to_string());
 }
 
 fn deserialize_caps<'de, D>(deserializer: D) -> Result<Option<capabilities::Capabilities>, D::Error>
