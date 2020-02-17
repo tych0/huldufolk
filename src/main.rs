@@ -114,6 +114,11 @@ fn main() {
         .nth(0)
         .expect("program doesn't have a 0 arg?");
 
+    // don't warn about empty UMHs.
+    if name.is_empty() {
+        exit(0);
+    }
+
     let args = std::env::args_os().collect();
     let thing = config
         .helpers
