@@ -68,7 +68,7 @@ const DEFAULT_CONFIG_PATH: Option<&'static str> = option_env!("DEFAULT_CONFIG_PA
 
 macro_rules! fail {
     ($($arg:tt)*) => ({
-        let log = std::fmt::format(format_args!($($arg)*));
+        let log = std::fmt::format(format_args!($($arg)*))+"\n";
 	let _ = std::io::stderr().write(log.as_ref());
 	std::process::exit(1)
     })
