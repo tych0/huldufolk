@@ -1,7 +1,7 @@
 [package]
 name = "usermode-helper"
 version = "0.1.0"
-authors = ["Tycho Andersen <tycho@tycho.ws>"]
+authors = ["Tycho Andersen <tycho@tycho.pizza>"]
 license = "Apache-2.0"
 readme = "README.md"
 homepage = "https://github.com/tych0/huldufolk"
