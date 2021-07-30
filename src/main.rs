@@ -90,11 +90,8 @@ fn log_to_kmsg() {
     unsafe {
         let ret = libc::dup2(file.as_raw_fd(), libc::STDERR_FILENO);
         if ret < 0 {
-            libc::perror(
-                CString::new("couldn't dup2 over stderr")
-                    .expect("constant string")
-                    .as_ptr(),
-            );
+            let err = CString::new("couldn't dup2 over stderr").expect("constant string");
+            libc::perror(err.as_ptr());
         }
     }
 }
@@ -132,11 +129,8 @@ fn main() {
         unsafe {
             let ret = libc::prctl(PR_SET_SECUREBITS, SECBIT_NOROOT, 0, 0, 0);
             if ret < 0 {
-                libc::perror(
-                    CString::new("couldn't set securebits")
-                        .expect("constant string")
-                        .as_ptr(),
-                );
+                let err = CString::new("couldn't set securebits").expect("constant string");
+                libc::perror(err.as_ptr());
             }
         }
 
@@ -152,11 +146,8 @@ fn main() {
             unsafe {
                 let ret = libc::prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0);
                 if ret < 0 {
-                    libc::perror(
-                        CString::new(format!("couldn't set ambient cap {}", cap))
-                            .expect("constant string")
-                            .as_ptr(),
-                    );
+                    let err = CString::new(format!("couldn't set ambient cap {}", cap)).expect("constant string");
+                    libc::perror(err.as_ptr());
                 }
             }
         }
@@ -186,11 +177,8 @@ fn main() {
 
     unsafe {
         libc::execvp(c_exe.as_ptr(), ptr_args.as_ptr());
-        libc::perror(
-            CString::new("couldn't execvp")
-                .expect("constant string")
-                .as_ptr(),
-        );
+        let err = CString::new("couldn't execvp").expect("constant string");
+        libc::perror(err.as_ptr());
     }
     exit(1);
 }
