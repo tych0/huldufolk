@@ -9,6 +9,9 @@ endif
 all:
 	rustfmt src/*
 	cargo build $(CARGO_FLAGS)
+ifndef DEBUG
+	strip ./target/release/usermode-helper
+endif
 
 .PHONY: check
 check:
