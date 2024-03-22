@@ -2,6 +2,8 @@ TEST?=$(patsubst test/%.bats,%,$(wildcard test/*.bats))
 
 CARGO_FLAGS?=
 ifndef DEBUG
+	# Unfortunately, this seems to be the only way to produce a statically linked rust binary.
+	CARGO_FLAGS+="--target x86_64-unknown-linux-musl"
 	CARGO_FLAGS+="--release"
 endif
 
