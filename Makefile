@@ -1,15 +1,20 @@
 TEST?=$(patsubst test/%.bats,%,$(wildcard test/*.bats))
 
+CARGO_FLAGS?=
+ifndef DEBUG
+	CARGO_FLAGS+="--release"
+endif
+
 .PHONY: all
 all:
 	rustfmt src/*
-	cargo build
+	cargo build $(CARGO_FLAGS)
 
 .PHONY: check
 check:
 	# need to force a rebuild for DEFAULT_CONFIG_PATH
 	cargo clean -p usermode-helper
-	DEFAULT_CONFIG_PATH=./usermode-helper.conf cargo build
+	DEFAULT_CONFIG_PATH=./usermode-helper.conf cargo build $(CARGO_FLAGS)
 	bats -t $(patsubst %,test/%.bats,$(TEST))
 
 .PHONY: check-dmesg
